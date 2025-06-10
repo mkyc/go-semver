@@ -170,7 +170,7 @@ func TestParseSemVer(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			semver, err := ParseSemVer(tt.tag)
+			semver, err := Parse(tt.tag)
 
 			// Check error expectation
 			if tt.expectError && err == nil {

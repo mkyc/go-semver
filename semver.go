@@ -55,9 +55,9 @@ type SemVer struct {
 	Build      string
 }
 
-// ParseSemVer parses a string tag into a SemVer struct according to the semantic versioning specification.
+// Parse parses a string tag into a SemVer struct according to the semantic versioning specification.
 // It returns an error if the tag does not conform to the semantic versioning format.
-func ParseSemVer(tag string) (SemVer, error) {
+func Parse(tag string) (SemVer, error) {
 	var semver SemVer
 
 	// Split the tag into version core and optional parts (pre-release and build)

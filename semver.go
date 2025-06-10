@@ -154,6 +154,14 @@ func Parse(tag string) (SemVer, error) {
 //	 0 if this version has equal precedence to the other
 //	 1 if this version has higher precedence than the other
 func (s SemVer) Compare(other SemVer) int {
+	// Check if one has a pre-release and the other doesn't
+	if s.PreRelease != "" && other.PreRelease == "" {
+		return -1
+	}
+	if s.PreRelease == "" && other.PreRelease != "" {
+		return 1
+	}
+
 	// Compare major version
 	if s.Major < other.Major {
 		return -1
@@ -178,14 +186,7 @@ func (s SemVer) Compare(other SemVer) int {
 		return 1
 	}
 
-	// At this point, major.minor.patch are equal, so we need to check pre-release identifiers
-	// A version without a pre-release has higher precedence
-	if s.PreRelease == "" && other.PreRelease != "" {
-		return 1
-	}
-	if s.PreRelease != "" && other.PreRelease == "" {
-		return -1
-	}
+	// At this point, major.minor.patch are equal, and either both have pre-release or both don't
 	if s.PreRelease == "" && other.PreRelease == "" {
 		return 0
 	}

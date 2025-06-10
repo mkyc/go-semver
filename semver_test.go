@@ -203,3 +203,100 @@ func TestParseSemVer(t *testing.T) {
 		})
 	}
 }
+
+func TestString(t *testing.T) {
+	tests := []struct {
+		name     string
+		semver   SemVer
+		expected string
+	}{
+		{
+			name: "Basic version",
+			semver: SemVer{
+				Major: 1,
+				Minor: 2,
+				Patch: 3,
+			},
+			expected: "1.2.3",
+		},
+		{
+			name: "Version with pre-release",
+			semver: SemVer{
+				Major:      1,
+				Minor:      2,
+				Patch:      3,
+				PreRelease: "alpha",
+			},
+			expected: "1.2.3-alpha",
+		},
+		{
+			name: "Version with build metadata",
+			semver: SemVer{
+				Major: 1,
+				Minor: 2,
+				Patch: 3,
+				Build: "build.123",
+			},
+			expected: "1.2.3+build.123",
+		},
+		{
+			name: "Version with pre-release and build metadata",
+			semver: SemVer{
+				Major:      1,
+				Minor:      2,
+				Patch:      3,
+				PreRelease: "alpha.1",
+				Build:      "build.123",
+			},
+			expected: "1.2.3-alpha.1+build.123",
+		},
+		{
+			name: "Version with complex pre-release",
+			semver: SemVer{
+				Major:      1,
+				Minor:      2,
+				Patch:      3,
+				PreRelease: "alpha.1.beta.2",
+			},
+			expected: "1.2.3-alpha.1.beta.2",
+		},
+		{
+			name: "Version with zero values",
+			semver: SemVer{
+				Major: 0,
+				Minor: 0,
+				Patch: 0,
+			},
+			expected: "0.0.0",
+		},
+		{
+			name: "Pre-release with numeric identifiers",
+			semver: SemVer{
+				Major:      1,
+				Minor:      2,
+				Patch:      3,
+				PreRelease: "0.1.2",
+			},
+			expected: "1.2.3-0.1.2",
+		},
+		{
+			name: "Pre-release with alphanumeric identifiers",
+			semver: SemVer{
+				Major:      1,
+				Minor:      2,
+				Patch:      3,
+				PreRelease: "alpha.1.beta-2",
+			},
+			expected: "1.2.3-alpha.1.beta-2",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.semver.String()
+			if result != tt.expected {
+				t.Errorf("String() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}

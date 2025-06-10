@@ -55,6 +55,24 @@ type SemVer struct {
 	Build      string
 }
 
+// String returns the string representation of the SemVer struct according to the semantic versioning specification.
+func (s SemVer) String() string {
+	// Start with the version core (major.minor.patch)
+	result := fmt.Sprintf("%d.%d.%d", s.Major, s.Minor, s.Patch)
+
+	// Add pre-release information if present
+	if s.PreRelease != "" {
+		result += "-" + s.PreRelease
+	}
+
+	// Add build metadata if present
+	if s.Build != "" {
+		result += "+" + s.Build
+	}
+
+	return result
+}
+
 // Parse parses a string tag into a SemVer struct according to the semantic versioning specification.
 // It returns an error if the tag does not conform to the semantic versioning format.
 func Parse(tag string) (SemVer, error) {

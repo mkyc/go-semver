@@ -204,6 +204,64 @@ func TestParseSemVer(t *testing.T) {
 	}
 }
 
+func TestIsRelease(t *testing.T) {
+	tests := []struct {
+		name     string
+		semver   SemVer
+		expected bool
+	}{
+		{
+			name: "Release version",
+			semver: SemVer{
+				Major: 1,
+				Minor: 2,
+				Patch: 3,
+			},
+			expected: true,
+		},
+		{
+			name: "Release version with build metadata",
+			semver: SemVer{
+				Major: 1,
+				Minor: 2,
+				Patch: 3,
+				Build: "build.123",
+			},
+			expected: true,
+		},
+		{
+			name: "Non-release version with pre-release",
+			semver: SemVer{
+				Major:      1,
+				Minor:      2,
+				Patch:      3,
+				PreRelease: "alpha",
+			},
+			expected: false,
+		},
+		{
+			name: "Non-release version with pre-release and build metadata",
+			semver: SemVer{
+				Major:      1,
+				Minor:      2,
+				Patch:      3,
+				PreRelease: "alpha.1",
+				Build:      "build.123",
+			},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.semver.IsRelease()
+			if result != tt.expected {
+				t.Errorf("IsRelease() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
 func TestString(t *testing.T) {
 	tests := []struct {
 		name     string

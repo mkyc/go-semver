@@ -73,6 +73,12 @@ func (s SemVer) String() string {
 	return result
 }
 
+// IsRelease returns true if the semantic version represents a release version.
+// A release version is one that doesn't have a pre-release identifier.
+func (s SemVer) IsRelease() bool {
+	return s.PreRelease == ""
+}
+
 // Parse parses a string tag into a SemVer struct according to the semantic versioning specification.
 // It returns an error if the tag does not conform to the semantic versioning format.
 func Parse(tag string) (SemVer, error) {

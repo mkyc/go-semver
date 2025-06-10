@@ -2,6 +2,7 @@ package semver
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -183,4 +184,112 @@ func Parse(tag string) (SemVer, error) {
 	}
 
 	return semver, nil
+}
+
+// Compare compares this version with another version according to semantic versioning precedence rules.
+// It returns:
+//
+//	-1 if this version has lower precedence than the other
+//	 0 if this version has equal precedence to the other
+//	 1 if this version has higher precedence than the other
+func (s SemVer) Compare(other SemVer) int {
+	// Compare major version
+	if s.Major < other.Major {
+		return -1
+	}
+	if s.Major > other.Major {
+		return 1
+	}
+
+	// Compare minor version
+	if s.Minor < other.Minor {
+		return -1
+	}
+	if s.Minor > other.Minor {
+		return 1
+	}
+
+	// Compare patch version
+	if s.Patch < other.Patch {
+		return -1
+	}
+	if s.Patch > other.Patch {
+		return 1
+	}
+
+	// At this point, major.minor.patch are equal, so we need to check pre-release identifiers
+	// A version without a pre-release has higher precedence
+	if s.PreRelease == "" && other.PreRelease != "" {
+		return 1
+	}
+	if s.PreRelease != "" && other.PreRelease == "" {
+		return -1
+	}
+	if s.PreRelease == "" && other.PreRelease == "" {
+		return 0
+	}
+
+	// Both have pre-release identifiers, compare them
+	sPreReleaseParts := strings.Split(s.PreRelease, ".")
+	otherPreReleaseParts := strings.Split(other.PreRelease, ".")
+
+	// Compare each pre-release identifier
+	minLen := len(sPreReleaseParts)
+	if len(otherPreReleaseParts) < minLen {
+		minLen = len(otherPreReleaseParts)
+	}
+
+	for i := 0; i < minLen; i++ {
+		sPart := sPreReleaseParts[i]
+		otherPart := otherPreReleaseParts[i]
+
+		// Check if both are numeric
+		sNum, sErr := strconv.ParseUint(sPart, 10, 64)
+		otherNum, otherErr := strconv.ParseUint(otherPart, 10, 64)
+
+		if sErr == nil && otherErr == nil {
+			// Both are numeric, compare numerically
+			if sNum < otherNum {
+				return -1
+			}
+			if sNum > otherNum {
+				return 1
+			}
+		} else if sErr != nil && otherErr != nil {
+			// Both are non-numeric, compare lexically
+			if sPart < otherPart {
+				return -1
+			}
+			if sPart > otherPart {
+				return 1
+			}
+		} else {
+			// One is numeric, one is not
+			// Numeric identifiers always have lower precedence
+			if sErr == nil { // s is numeric
+				return -1
+			} else { // other is numeric
+				return 1
+			}
+		}
+	}
+
+	// If we've compared all identifiers and they're equal up to the length of the shorter one,
+	// the version with fewer identifiers has lower precedence
+	if len(sPreReleaseParts) < len(otherPreReleaseParts) {
+		return -1
+	}
+	if len(sPreReleaseParts) > len(otherPreReleaseParts) {
+		return 1
+	}
+
+	// They're completely equal
+	return 0
+}
+
+// Sort sorts a slice of SemVer objects in ascending order according to semantic versioning precedence rules.
+func Sort(versions []SemVer) {
+	sort.Slice(versions, func(i, j int) bool {
+		return versions[i].Compare(versions[j]) < 0
+	})
 }

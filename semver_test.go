@@ -487,6 +487,21 @@ func TestCompare(t *testing.T) {
 			},
 			expected: 1,
 		},
+		{
+			name: "Higher version with pre-release vs. lower version: 2.0.0-alpha < 1.0.0",
+			version1: SemVer{
+				Major:      2,
+				Minor:      0,
+				Patch:      0,
+				PreRelease: "alpha",
+			},
+			version2: SemVer{
+				Major: 1,
+				Minor: 0,
+				Patch: 0,
+			},
+			expected: -1,
+		},
 
 		// Different pre-release identifiers
 		{
@@ -735,9 +750,9 @@ func TestSort(t *testing.T) {
 				{Major: 1, Minor: 0, Patch: 0, PreRelease: "beta"},
 			},
 			expected: []SemVer{
-				{Major: 0, Minor: 9, Patch: 9},
 				{Major: 1, Minor: 0, Patch: 0, PreRelease: "alpha"},
 				{Major: 1, Minor: 0, Patch: 0, PreRelease: "beta"},
+				{Major: 0, Minor: 9, Patch: 9},
 				{Major: 1, Minor: 0, Patch: 0},
 				{Major: 1, Minor: 0, Patch: 1},
 				{Major: 1, Minor: 1, Patch: 0},
@@ -816,6 +831,20 @@ func TestSort(t *testing.T) {
 				{Major: 1, Minor: 0, Patch: 1},
 				{Major: 1, Minor: 1, Patch: 0},
 				{Major: 2, Minor: 0, Patch: 0},
+			},
+		},
+		{
+			name: "Higher pre release identifier",
+			versions: []SemVer{
+				{Major: 0, Minor: 9, Patch: 8},
+				{Major: 1, Minor: 0, Patch: 0, PreRelease: "alpha"},
+				{Major: 0, Minor: 9, Patch: 9},
+			},
+			expected: []SemVer{
+				// ie.: 1.0.0 > 0.11.0 > 1.0.0-beta > 1.0.0-alpha > 0.11.0-rc.1
+				{Major: 1, Minor: 0, Patch: 0, PreRelease: "alpha"},
+				{Major: 0, Minor: 9, Patch: 8},
+				{Major: 0, Minor: 9, Patch: 9},
 			},
 		},
 	}
